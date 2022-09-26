@@ -1,5 +1,15 @@
-import * as functions from "firebase-functions";
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
+const serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://ng-goty-default-rtdb.europe-west1.firebasedatabase.app"
+
+});
+
+const db = admin.firestore();
 
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
@@ -9,3 +19,15 @@ export const helloWorld = functions.https.onRequest((request, response) => {
   response.json({
     message: "Hello from Firebase!111"});
 });
+
+export const getGOTY = functions.https.onRequest( async(request, response) => {
+  
+  const gotyRef = db.collection('goty');
+
+  const docsSnap = await gotyRef.get();
+
+  const games = docsSnap.docs.map( doc=> doc.data())
+  response.json(
+    games)
+ });
+ 
