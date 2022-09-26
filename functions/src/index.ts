@@ -1,6 +1,9 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
+import * as express from 'express';
+import * as cors from 'cors';
+
 const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
@@ -26,8 +29,28 @@ export const getGOTY = functions.https.onRequest( async(request, response) => {
 
   const docsSnap = await gotyRef.get();
 
-  const games = docsSnap.docs.map( doc=> doc.data())
-  response.json(
-    games)
+  const games = docsSnap.docs.map( doc=> doc.data());
+
+  response.json(games)
  });
  
+//Express server
+
+const app= express();
+
+app.use( cors({
+  origin: true
+}))
+
+app.get('/goty', async(req, res)=>{
+
+  const gotyRef = db.collection('goty');
+
+  const docsSnap = await gotyRef.get();
+
+  const games = docsSnap.docs.map( doc=> doc.data());
+
+  res.json(games)
+})
+
+export const api= functions.https.onRequest( app );
