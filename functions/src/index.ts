@@ -53,4 +53,34 @@ app.get('/goty', async(req, res)=>{
   res.json(games)
 })
 
+app.post('/goty/:id', async(req, res)=>{
+
+  const id = req.params.id;
+
+  const gameRef = db.collection('goty').doc(id);
+
+  const gameSnap = await gameRef.get();
+
+  if( !gameSnap.exists){
+      res.status(404).json({
+        ok:false,
+        msg: `There is no game with id: ${id}`
+      });
+  }else{
+
+    const before= gameSnap.data() || {votes:0};
+    await gameRef.update({
+      votes: before.votes +1
+
+    });
+
+    res.json({
+      ok:true,
+      msg: `Thanks for voting for ${before.name}`
+    })
+  }
+
+  
+})
+
 export const api= functions.https.onRequest( app );
